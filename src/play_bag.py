@@ -3,7 +3,8 @@
 import pyrealsense2 as rs
 import numpy as np
 import cv2
-from os import path
+import os
+import argparse
 
 FPS = 30
 WIDTH = 1280
@@ -16,13 +17,15 @@ def scale_to_width(img, width):
 
 
 def play_bag():
-
     # set the stream (color/depth/infrared)
     config = rs.config()
+    
     # set the file name recorded
-    bag_dir = path.join(path.dirname(__file__), '../data/bag/')
-    config.enable_device_from_file(path.join(bag_dir, filename+'.bag'), 
-                                   repeat_playback=False)
+    if not os.path.exists(bag_dir_path):
+        os.makedirs(bag_dir_path)
+    config.enable_device_from_file(
+        os.path.join(bag_dir_path, filename+'.bag'), repeat_playback=False)
+
     config.enable_stream(rs.stream.color, WIDTH, HEIGHT, rs.format.bgr8, FPS)
     config.enable_stream(rs.stream.depth, WIDTH, HEIGHT, rs.format.z16, FPS)
 
@@ -50,6 +53,7 @@ def play_bag():
             if not depth_frame or not color_frame:
                 continue
             color_image = np.asanyarray(color_frame.get_data())
+            depth_image = np.asanyarray(depth_frame.get_data())
 
             # get depth image
             depth_color_frame = rs.colorizer().colorize(depth_frame)
@@ -63,8 +67,13 @@ def play_bag():
             cv2.moveWindow('RealSense', 100, 200)
             cv2.imshow('RealSense', dst_images)
 
-            key = cv2.waitKey(1)
-            if key & 0xff == 27:
+            if cv2.waitKey(1) & 0xff == 27:
+                if not os.path.exists(png_dir_path):
+                    os.makedirs(png_dir_path)
+                cv2.imwrite(os.path.join(
+                    png_dir_path, filename+'_color.png'), color_image)
+                cv2.imwrite(os.path.join(
+                    png_dir_path, filename+'_depth.png'), depth_color_image)
                 break
 
     finally:
@@ -74,5 +83,11 @@ def play_bag():
 
 
 if __name__ == '__main__':
-    filename = "record"
+    parser = argparse.ArgumentParser()
+    parser.add_argument("bagname", help="bag file name")
+    args = parser.parse_args()
+    filename = args.bagname
+
+    bag_dir_path = os.path.join(os.path.dirname(__file__), '../data/bag/')
+    png_dir_path = os.path.join(os.path.dirname(__file__), '../data/png/')
     play_bag()

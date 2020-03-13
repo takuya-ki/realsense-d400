@@ -5,12 +5,16 @@ import numpy as np
 import cv2
 import time
 import os
-
-RECORD_TIME_SEC = 20.0
+import argparse
 
 FPS = 30
 WIDTH = 1280
 HEIGHT = 720
+
+
+def scale_to_width(img, width):
+    scale = width / img.shape[1]
+    return cv2.resize(img, dsize=None, fx=scale, fy=scale)
 
 
 def record_bag():
@@ -21,11 +25,10 @@ def record_bag():
     config.enable_stream(rs.stream.infrared, WIDTH, HEIGHT, rs.format.y8, FPS)
 
     # set the file name recorded
-    save_dir_path = os.path.join(os.path.dirname(__file__), '../data/bag/')
-    if not os.path.exists(save_dir_path):
-        os.makedirs(save_dir_path)
+    if not os.path.exists(bag_dir_path):
+        os.makedirs(bag_dir_path)
 
-    filepath = os.path.join(save_dir_path, filename+'.bag')
+    filepath = os.path.join(bag_dir_path, filename+'.bag')
     config.enable_record_to_file(filepath)
 
     # start streaming
@@ -61,24 +64,24 @@ def record_bag():
             if not depth_frame or not color_frame:
                 continue
             color_image = np.asanyarray(color_frame.get_data())
+            depth_image = np.asanyarray(depth_frame.get_data())
+            
             # get depth image
             depth_color_frame = rs.colorizer().colorize(depth_frame)
             depth_color_image = np.asanyarray(depth_color_frame.get_data())
 
             # displaying
-            images = np.hstack((cv2.resize(color_image, 
-                                           (640, 360), 
-                                           interpolation=cv2.INTER_LINEAR), \
-                                cv2.resize(depth_color_image, 
-                                           (640, 360), 
-                                           interpolation=cv2.INTER_LINEAR) ))
+            images = np.hstack((color_image, depth_color_image))
+            dst_images = scale_to_width(images, 800)
+
             cv2.namedWindow('RealSense', cv2.WINDOW_AUTOSIZE)
-            cv2.imshow('RealSense', images)
+            cv2.moveWindow('RealSense', 100, 200)
+            cv2.imshow('RealSense', dst_images)
             key = cv2.waitKey(1)
 
             # save for sec
             elapsed_time = time.time() - start
-            if elapsed_time > RECORD_TIME_SEC:
+            if elapsed_time > record_time_sec:
                 break
 
     finally:
@@ -88,5 +91,13 @@ def record_bag():
 
 
 if __name__ == '__main__':
-    filename = "record"
+    parser = argparse.ArgumentParser()
+    parser.add_argument("bagname", help="bag file name")
+    parser.add_argument("-rs", "--record_time_sec", type=float, default=5.0,
+                    help="time set for recording a bag")
+    args = parser.parse_args()
+    filename = args.bagname
+    record_time_sec = args.record_time_sec
+
+    bag_dir_path = os.path.join(os.path.dirname(__file__), '../data/bag/')
     record_bag()
