@@ -49,7 +49,6 @@ def record_bag():
     print("New exposure = %d" % exp)
 
     time.sleep(1)
-
     start = time.time()
     try:
         while True:

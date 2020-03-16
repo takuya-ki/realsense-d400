@@ -17,9 +17,11 @@ RealSense D400 series utilities.
 2. To play the recorded bag and to display the images in the bag  
 `$ python src/play_bag.py record`
 
-1. To convert .bag into .mp4  
+3. To convert .bag into .mp4  
 `$ python src/bag2mp4.py record`
 
+4. To snap from bag file
+`$ python src/bagsnap.py`
 
 ## Author
 
