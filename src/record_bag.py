@@ -46,7 +46,7 @@ def setting_sensor_params():
     print("New white balance = %d" % wb)
 
 
-def record_bag(save_bagpath):
+def record_bag(save_bagpath, record_sec):
     # set the stream (color/depth/infrared)
     config = rs.config()
     config.enable_stream(rs.stream.color, WIDTH, HEIGHT, rs.format.bgr8, FPS)
@@ -97,7 +97,7 @@ def record_bag(save_bagpath):
 
             # save for sec
             elapsed_time = time.time() - start
-            if elapsed_time > record_time_sec:
+            if elapsed_time > record_sec:
                 break
 
     finally:
@@ -125,4 +125,4 @@ if __name__ == '__main__':
         filename += '.bag'
 
     bag_path = os.path.join(bag_dir_path, filename)
-    record_bag(save_bagpath=bag_path)
+    record_bag(save_bagpath=bag_path, record_sec=record_time_sec)
