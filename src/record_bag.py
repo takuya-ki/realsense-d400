@@ -33,7 +33,7 @@ def setting_sensor_params():
     exp = sensor_color.get_option(rs.option.exposure)
     print("Exposure = %d" % exp)
     print("Setting exposure to new value")
-    sensor_color.set_option(rs.option.exposure, 200)
+    sensor_color.set_option(rs.option.exposure, EXPOSURE)
     exp = sensor_color.get_option(rs.option.exposure)
     print("New exposure = %d" % exp)
 
@@ -41,7 +41,7 @@ def setting_sensor_params():
     wb = sensor_color.get_option(rs.option.white_balance)
     print("White balance = %d" % wb)
     print("Setting white balance to new value")
-    sensor_color.set_option(rs.option.white_balance, 4600)
+    sensor_color.set_option(rs.option.white_balance, WHITE_BALANCE)
     wb = sensor_color.get_option(rs.option.white_balance)
     print("New white balance = %d" % wb)
 
