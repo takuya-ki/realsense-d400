@@ -20,8 +20,8 @@ RealSense D400 series utilities.
 3. To convert .bag into .mp4  
 `$ python src/bag2mp4.py record`
 
-4. To snap from bag file
-`$ python src/bagsnap.py`
+4. To snap from bag file (set directory name instead of file name)
+`$ python src/bagsnap.py bag`
 
 ## Author
 

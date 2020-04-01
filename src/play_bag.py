@@ -5,27 +5,14 @@ import numpy as np
 import cv2
 import os
 import argparse
-
-FPS = 30
-WIDTH = 1280
-HEIGHT = 720
+from sensor_config import *
+from sensor_utils import *
 
 
-def scale_to_width(img, width):
-    scale = width / img.shape[1]
-    return cv2.resize(img, dsize=None, fx=scale, fy=scale)
-
-
-def play_bag():
+def play_bag(bag_path):
     # set the stream (color/depth/infrared)
     config = rs.config()
-    
-    # set the file name recorded
-    if not os.path.exists(bag_dir_path):
-        os.makedirs(bag_dir_path)
-    config.enable_device_from_file(
-        os.path.join(bag_dir_path, filename+'.bag'), repeat_playback=False)
-
+    config.enable_device_from_file(bag_path, repeat_playback=False)
     config.enable_stream(rs.stream.color, WIDTH, HEIGHT, rs.format.bgr8, FPS)
     config.enable_stream(rs.stream.depth, WIDTH, HEIGHT, rs.format.z16, FPS)
 
@@ -68,12 +55,19 @@ def play_bag():
             cv2.imshow('RealSense', dst_images)
 
             if cv2.waitKey(1) & 0xff == 27:
+                png_dir_path = os.path.join(
+                    bag_dir_path, "png"
+                )
                 if not os.path.exists(png_dir_path):
                     os.makedirs(png_dir_path)
                 cv2.imwrite(os.path.join(
-                    png_dir_path, filename+'_color.png'), color_image)
+                    png_dir_path,
+                    os.path.splitext(os.path.basename(bag_path))[0]+'_color.png'), 
+                    color_image)
                 cv2.imwrite(os.path.join(
-                    png_dir_path, filename+'_depth.png'), depth_color_image)
+                    png_dir_path, 
+                    os.path.splitext(os.path.basename(bag_path))[0]+'_depth.png'), 
+                    depth_color_image)
                 break
 
     finally:
@@ -87,7 +81,15 @@ if __name__ == '__main__':
     parser.add_argument("bagname", help="bag file name")
     args = parser.parse_args()
     filename = args.bagname
-
     bag_dir_path = os.path.join(os.path.dirname(__file__), '../data/bag/')
-    png_dir_path = os.path.join(os.path.dirname(__file__), '../data/png/')
-    play_bag()
+
+    # set the file name recorded
+    if not os.path.exists(bag_dir_path):
+        os.makedirs(bag_dir_path)
+
+    # add ext for bag file
+    if '.bag' not in filename:
+        filename += '.bag'
+
+    bag_file_path = os.path.join(bag_dir_path, filename)
+    play_bag(bag_path=bag_file_path)

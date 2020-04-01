@@ -5,36 +5,20 @@ import numpy as np
 import cv2
 import os
 import argparse
-
-FPS = 30
-WIDTH = 1280
-HEIGHT = 720
+from sensor_config import *
+from sensor_utils import *
 
 
-def scale_to_width(img, width):
-    scale = width / img.shape[1]
-    return cv2.resize(img, dsize=None, fx=scale, fy=scale)
-
-
-def bag2mp4():
-    
+def bag2mp4(bag_path, mp4_path):
     # setting of fourcc (for mp4)
     fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
     
     # specification of the video (file name, fourcc, FPS, size) 
-    if not os.path.exists(mp4_dir_path):
-        os.makedirs(mp4_dir_path)
-    mp4_file_path = os.path.join(mp4_dir_path, filename+'.mp4')
-    video = cv2.VideoWriter(mp4_file_path, fourcc, FPS, (WIDTH, HEIGHT)) 
+    video = cv2.VideoWriter(mp4_path, fourcc, FPS, (WIDTH, HEIGHT)) 
 
     # set the stream (color/depth/infrared)
     config = rs.config()
-
-    # set the file name recorded
-    if not os.path.exists(bag_dir_path):
-        os.makedirs(bag_dir_path)
-    config.enable_device_from_file(
-        os.path.join(bag_dir_path, filename+'.bag'), repeat_playback=False)
+    config.enable_device_from_file(bag_path, repeat_playback=False)
     config.enable_stream(rs.stream.color, WIDTH, HEIGHT, rs.format.bgr8, FPS)
     config.enable_stream(rs.stream.depth, WIDTH, HEIGHT, rs.format.z16, FPS)
 
@@ -92,6 +76,19 @@ if __name__ == '__main__':
     args = parser.parse_args()
     filename = args.bagname
 
-    bag_dir_path = os.path.join(os.path.dirname(__file__), '../data/bag/')
-    mp4_dir_path = os.path.join(os.path.dirname(__file__), '../data/mp4/')
-    bag2mp4()
+    # remove ext in the input file
+    filename = os.path.splitext(os.path.basename(filename))[0]
+
+    bag_dir_path = os.path.join(
+        os.path.dirname(__file__), '../data/bag/')
+    if not os.path.exists(bag_dir_path):
+        os.makedirs(bag_dir_path)
+    bag_file_path = os.path.join(bag_dir_path, filename+'.bag')
+
+    mp4_dir_path = os.path.join(
+        os.path.dirname(__file__), '../data/mp4/')
+    if not os.path.exists(mp4_dir_path):
+        os.makedirs(mp4_dir_path)
+    mp4_file_path = os.path.join(mp4_dir_path, filename+'.mp4')
+
+    bag2mp4(bag_path=bag_file_path, mp4_path=mp4_file_path)

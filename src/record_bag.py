@@ -6,15 +6,8 @@ import cv2
 import time
 import os
 import argparse
-
-FPS = 30
-WIDTH = 1280
-HEIGHT = 720
-
-
-def scale_to_width(img, width):
-    scale = width / img.shape[1]
-    return cv2.resize(img, dsize=None, fx=scale, fy=scale)
+from sensor_config import *
+from sensor_utils import *
 
 
 def setting_sensor_params():
@@ -53,19 +46,13 @@ def setting_sensor_params():
     print("New white balance = %d" % wb)
 
 
-def record_bag():
+def record_bag(save_bagpath):
     # set the stream (color/depth/infrared)
     config = rs.config()
     config.enable_stream(rs.stream.color, WIDTH, HEIGHT, rs.format.bgr8, FPS)
     config.enable_stream(rs.stream.depth, WIDTH, HEIGHT, rs.format.z16, FPS)
     config.enable_stream(rs.stream.infrared, WIDTH, HEIGHT, rs.format.y8, FPS)
-
-    # set the file name recorded
-    if not os.path.exists(bag_dir_path):
-        os.makedirs(bag_dir_path)
-
-    filepath = os.path.join(bag_dir_path, filename+'.bag')
-    config.enable_record_to_file(filepath)
+    config.enable_record_to_file(save_bagpath)
 
     # start streaming
     pipeline = rs.pipeline()
@@ -106,7 +93,7 @@ def record_bag():
             cv2.namedWindow('RealSense', cv2.WINDOW_AUTOSIZE)
             cv2.moveWindow('RealSense', 100, 200)
             cv2.imshow('RealSense', dst_images)
-            key = cv2.waitKey(1)
+            cv2.waitKey(1)
 
             # save for sec
             elapsed_time = time.time() - start
@@ -123,10 +110,19 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("bagname", help="bag file name")
     parser.add_argument("-rs", "--record_time_sec", type=float, default=5.0,
-                    help="time set for recording a bag")
+                        help="time set for recording a bag")
     args = parser.parse_args()
     filename = args.bagname
     record_time_sec = args.record_time_sec
-
     bag_dir_path = os.path.join(os.path.dirname(__file__), '../data/bag/')
-    record_bag()
+
+    # set the file name recorded
+    if not os.path.exists(bag_dir_path):
+        os.makedirs(bag_dir_path)
+
+    # add ext for bag file
+    if '.bag' not in filename:
+        filename += '.bag'
+
+    bag_path = os.path.join(bag_dir_path, filename)
+    record_bag(save_bagpath=bag_path)

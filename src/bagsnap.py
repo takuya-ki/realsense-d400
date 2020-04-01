@@ -6,29 +6,22 @@ import cv2
 import os
 import glob
 import time
-
-FPS = 30
-WIDTH = 1280
-HEIGHT = 720
-
-
-def scale_to_width(img, width):
-    scale = width / img.shape[1]
-    return cv2.resize(img, dsize=None, fx=scale, fy=scale)
+import argparse
+from sensor_config import *
+from sensor_utils import *
 
 
-def snap_bag():
+def snap_bag(bag_dir_path):
     # set the stream (color/depth/infrared)
     config = rs.config()
-    
     for filepath in glob.glob(os.path.join(bag_dir_path, '*.bag')):
         filename = os.path.splitext(os.path.basename(filepath))[0]
 
         # set the file name recorded
         if not os.path.exists(bag_dir_path):
             os.makedirs(bag_dir_path)
-        config.enable_device_from_file(
-            os.path.join(bag_dir_path, filename+'.bag'), repeat_playback=False)
+        bag_path = os.path.join(bag_dir_path, filename+'.bag')
+        config.enable_device_from_file(bag_path, repeat_playback=False)
 
         config.enable_stream(rs.stream.color, WIDTH, HEIGHT, rs.format.bgr8, FPS)
         config.enable_stream(rs.stream.depth, WIDTH, HEIGHT, rs.format.z16, FPS)
@@ -77,12 +70,19 @@ def snap_bag():
                 # save for sec
                 elapsed_time = time.time() - start
                 if elapsed_time > 3.0:
+                    png_dir_path = os.path.join(
+                        bag_dir_path, "png"
+                    )
                     if not os.path.exists(png_dir_path):
                         os.makedirs(png_dir_path)
                     cv2.imwrite(os.path.join(
-                        png_dir_path, filename+'_color.png'), color_image)
+                        png_dir_path,
+                        os.path.splitext(os.path.basename(bag_path))[0]+'_color.png'), 
+                        color_image)
                     cv2.imwrite(os.path.join(
-                        png_dir_path, filename+'_depth.png'), depth_color_image)
+                        png_dir_path, 
+                        os.path.splitext(os.path.basename(bag_path))[0]+'_depth.png'), 
+                        depth_color_image)
                     break
 
         finally:
@@ -92,6 +92,13 @@ def snap_bag():
 
 
 if __name__ == '__main__':
-    bag_dir_path = os.path.join(os.path.dirname(__file__), '../data/bag/')
-    png_dir_path = os.path.join(os.path.dirname(__file__), '../data/png/')
-    snap_bag()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("bagdirectory", help="bag directory name")
+    args = parser.parse_args()
+    filename = args.bagdirectory
+
+    bag_directory_path = os.path.join(
+        os.path.dirname(__file__), '../data/bag/')
+    if not os.path.exists(bag_directory_path):
+        os.makedirs(bag_directory_path)
+    snap_bag(bag_dir_path=bag_directory_path)
