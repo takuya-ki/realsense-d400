@@ -17,6 +17,42 @@ def scale_to_width(img, width):
     return cv2.resize(img, dsize=None, fx=scale, fy=scale)
 
 
+def setting_sensor_params():
+    ctx = rs.context()
+    device_list = ctx.query_devices()
+    num_devices = device_list.size()
+    print(num_devices)
+    assert num_devices > 0
+    device = device_list[0]
+    sensors = device.query_sensors()
+    color_idx = -1
+    for i in range(len(sensors)):
+        if not sensors[i].is_depth_sensor():
+            color_idx = i
+            break
+    assert color_idx != -1
+
+    sensor_color = sensors[color_idx]
+    sensor_color.set_option(rs.option.enable_auto_exposure, 0)
+    sensor_color.set_option(rs.option.enable_auto_white_balance, 0)
+
+    print("\nTrying to set exposure")
+    exp = sensor_color.get_option(rs.option.exposure)
+    print("Exposure = %d" % exp)
+    print("Setting exposure to new value")
+    sensor_color.set_option(rs.option.exposure, 200)
+    exp = sensor_color.get_option(rs.option.exposure)
+    print("New exposure = %d" % exp)
+
+    print("\nTrying to set white balance")
+    wb = sensor_color.get_option(rs.option.white_balance)
+    print("White balance = %d" % wb)
+    print("Setting white balance to new value")
+    sensor_color.set_option(rs.option.white_balance, 4600)
+    wb = sensor_color.get_option(rs.option.white_balance)
+    print("New white balance = %d" % wb)
+
+
 def record_bag():
     # set the stream (color/depth/infrared)
     config = rs.config()
@@ -39,14 +75,8 @@ def record_bag():
     align_to = rs.stream.color
     align = rs.align(align_to)
 
-    sensor_dep = profile.get_device().first_depth_sensor()
-    print("Trying to set Exposure")
-    exp = sensor_dep.get_option(rs.option.exposure)
-    print("exposure = %d" % exp)
-    print("Setting exposure to new value")
-    sensor_dep.set_option(rs.option.exposure, 25000)
-    exp = sensor_dep.get_option(rs.option.exposure)
-    print("New exposure = %d" % exp)
+    # set fixed sensor parameters
+    setting_sensor_params()
 
     time.sleep(1)
     start = time.time()
