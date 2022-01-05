@@ -1,11 +1,13 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import pyrealsense2 as rs
-import numpy as np
+
+import os
 import cv2
 import time
-import os
 import argparse
+import numpy as np
+import pyrealsense2 as rs
+
 from sensor_config import *
 from sensor_utils import *
 

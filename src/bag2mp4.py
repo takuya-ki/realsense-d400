@@ -1,10 +1,12 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import pyrealsense2 as rs
-import numpy as np
-import cv2
+
 import os
+import cv2
 import argparse
+import numpy as np
+import pyrealsense2 as rs
+
 from sensor_config import *
 from sensor_utils import *
 
@@ -19,8 +21,8 @@ def bag2mp4(bag_path, mp4_path):
     # set the stream (color/depth/infrared)
     config = rs.config()
     config.enable_device_from_file(bag_path, repeat_playback=False)
-    config.enable_stream(rs.stream.color, WIDTH, HEIGHT, rs.format.bgr8, FPS)
-    config.enable_stream(rs.stream.depth, WIDTH, HEIGHT, rs.format.z16, FPS)
+    config.enable_stream(rs.stream.color, WIDTH, HEIGHT, rs.format.rgb8, FPS)
+    # config.enable_stream(rs.stream.depth, WIDTH, HEIGHT, rs.format.z16, FPS)
 
     # start streaming
     pipeline = rs.pipeline()
@@ -41,20 +43,23 @@ def bag2mp4(bag_path, mp4_path):
             # for alignment
             aligned_frames = align.process(frames)
             color_frame = aligned_frames.get_color_frame()
-            depth_frame = aligned_frames.get_depth_frame()
+            # depth_frame = aligned_frames.get_depth_frame()
 
-            if not depth_frame or not color_frame:
+            # if not depth_frame or not color_frame:
+            if not color_frame:
                 continue
             color_image = np.asanyarray(color_frame.get_data())
-            depth_image = np.asanyarray(depth_frame.get_data())
+            # depth_image = np.asanyarray(depth_frame.get_data())
 
             # get depth image
-            depth_color_frame = rs.colorizer().colorize(depth_frame)
-            depth_color_image = np.asanyarray(depth_color_frame.get_data())
+            # depth_color_frame = rs.colorizer().colorize(depth_frame)
+            # depth_color_image = np.asanyarray(depth_color_frame.get_data())
 
             # displaying
-            images = np.hstack((color_image, depth_color_image))
+            # images = np.hstack((color_image, depth_color_image))
+            color_image = cv2.cvtColor(color_image, cv2.COLOR_RGB2BGR)
             video.write(color_image) 
+            images = color_image.copy()
             dst_images = scale_to_width(images, 800)
 
             cv2.namedWindow('RealSense', cv2.WINDOW_AUTOSIZE)

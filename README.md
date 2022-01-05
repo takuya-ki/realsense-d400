@@ -2,12 +2,17 @@
 
 RealSense D400 series utilities.
 
-## Requirements
+## Requirements (tested)
 
-- Python 3.6.9 (recommended)
-- opencv-contrib-python
-- pyrealsense2
-- numpy
+- Python 3.7.3
+- numpy 1.21.5
+- opencv-contrib-python 3.4.2.17
+- pyrealsense2 2.34.0.1470
+
+## Installation
+
+	$ git clone https://github.com/takuya-ki/realsense-d400.git
+	$ pip install -r requirements.txt
 
 ## Usage
 
