@@ -34,4 +34,4 @@ RealSense D400 series utilities.
 
 ## License
 
-MIT
+This software is released under the MIT License, see [LICENSE](./LICENSE).
