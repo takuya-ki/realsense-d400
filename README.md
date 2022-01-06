@@ -6,7 +6,7 @@ RealSense D400 series utilities.
 
 - Python 3.7.3
 - numpy 1.21.5
-- opencv-contrib-python 3.4.2.17
+- opencv-contrib-python 4.5.1.48
 - pyrealsense2 2.34.0.1470
 
 ## Installation
