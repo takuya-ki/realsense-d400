@@ -17,11 +17,17 @@ RealSense D400 series utilities
 
 ## Usage
 
+##### main programs
     $ python record_bag.py --save_type [save_type] --is_rsopt --rectime 10 --bag [path_to_bag_file] --cfg_path [path_to_cfg_file]
     $ python record_bag.py --save_type RGBD --is_rsopt --rectime 5 --bag data/bag/record2.bag --cfg_path data/cfg/rsd435.pkl
 
     $ python play_bag.py --save_type [save_type] --is_rsopt --bag [path_to_bag_file] --cfg_path [path_to_cfg_file]
     $ python play_bag.py --save_type RGBD --is_rsopt --bag data/bag/record2.bag --cfg_path data/cfg/rsd435.pkl
+
+##### change camera configurations
+
+1. modify the parameters written in data/cfg/gen_config.py
+2. generate configuration file `$ python data/cfg/gen_config.py`
 
 ## Author / Contributor
 
