@@ -1,13 +1,14 @@
 # realsense-d400
 
-RealSense D400 series utilities.
+RealSense D400 series utilities
 
-## Requirements (tested)
+## Requirements
 
 - Python 3.7.3
-- numpy 1.21.5
-- opencv-contrib-python 4.5.1.48
-- pyrealsense2 2.34.0.1470
+  - numpy 1.21.5
+  - pickle-mixin 1.0.2
+  - opencv-python 4.5.1.48
+  - pyrealsense2 2.34.0.1470
 
 ## Installation
 
@@ -16,19 +17,13 @@ RealSense D400 series utilities.
 
 ## Usage
 
-1. Prepare a sample bag file using record_bag.py  
-`$ python src/record_bag.py record --record_time_sec 5.0`
+    $ python record_bag.py --save_type [save_type] --is_rsopt --rectime 10 --bag [path_to_bag_file] --cfg_path [path_to_cfg_file]
+    $ python record_bag.py --save_type RGBD --is_rsopt --rectime 5 --bag data/bag/record2.bag --cfg_path data/cfg/rsd435.pkl
 
-2. To play the recorded bag and to display the images in the bag  
-`$ python src/play_bag.py record`
+    $ python play_bag.py --save_type [save_type] --is_rsopt --bag [path_to_bag_file] --cfg_path [path_to_cfg_file]
+    $ python play_bag.py --save_type RGBD --is_rsopt --bag data/bag/record2.bag --cfg_path data/cfg/rsd435.pkl
 
-3. To convert .bag into .mp4  
-`$ python src/bag2mp4.py record`
-
-4. To snap from bag file (set directory name instead of file name)  
-`$ python src/bagsnap.py bag`
-
-## Author
+## Author / Contributor
 
 [Takuya Kiyokawa](https://takuya-ki.github.io/)
 
