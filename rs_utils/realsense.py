@@ -5,7 +5,19 @@ import cv2
 import time
 import pickle
 import numpy as np
+import open3d as o3d
+from enum import IntEnum
 import pyrealsense2 as rs
+from datetime import datetime
+
+
+class Preset(IntEnum):
+    Custom = 0
+    Default = 1
+    Hand = 2
+    HighAccuracy = 3
+    HighDensity = 4
+    MediumDensity = 5
 
 
 class RealSenseD435(object):
@@ -404,3 +416,98 @@ class RealSenseD435(object):
             # stop streaming
             self._pipeline.stop()
             cv2.destroyAllWindows()
+
+    def _get_intrinsic_matrix(self, frame):
+        intr = frame.profile.as_video_stream_profile().intrinsics
+        out = o3d.camera.PinholeCameraIntrinsic(
+            640, 480, intr.fx, intr.fy, intr.ppx, intr.ppy)
+        return out
+
+    def capture_pcd(self, pcdpath):
+        # start streaming
+        profile = self._pipeline.start(self._realsense)
+        depth_sensor = profile.get_device().first_depth_sensor()
+        # using preset HighAccuracy for recording
+        depth_sensor.set_option(rs.option.visual_preset, Preset.HighAccuracy)
+        # set fixed sensor parameters
+        self._setting_sensor_params()
+        time.sleep(1)
+        # getting the depth sensor's depth scale (see rs-align example for explanation)
+        depth_scale = depth_sensor.get_depth_scale()
+        # not display the background of objects more than
+        # clipping_distance_in_meters meters away
+        clipping_distance_in_meters = 3  # 3 meter
+        clipping_distance = clipping_distance_in_meters / depth_scale
+        # Create an align object
+        align_to = rs.stream.depth
+        align = rs.align(align_to)
+
+        vis = o3d.visualization.VisualizerWithKeyCallback()
+        vis.create_window()
+
+        self._pcdpath = pcdpath
+        def save_pcd(_vis):
+            o3d.io.write_point_cloud(self._pcdpath, self._pcd)
+        vis.register_key_callback(ord("S"), save_pcd)
+        self._return_cmd = False
+        def return_with_q(_vis):
+            self._return_cmd = True
+        vis.register_key_callback(ord("Q"), return_with_q)
+
+        self._pcd = o3d.geometry.PointCloud()
+        flip_transform = [[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]]
+        # streaming loop
+        frame_count = 0
+        try:
+            while True:
+                dt0 = datetime.now()
+                try:
+                    frames = self._pipeline.wait_for_frames(5000)
+                    frames = align.process(frames)
+                except RuntimeError:
+                    break
+
+                # Get aligned frames
+                depth_frame = frames.get_depth_frame()
+                color_frame = frames.get_color_frame()
+                intrinsic = o3d.camera.PinholeCameraIntrinsic(
+                    self._get_intrinsic_matrix(color_frame))
+
+                # Validate that both frames are valid
+                if not depth_frame or not color_frame:
+                    continue
+
+                depth_image = o3d.geometry.Image(
+                    np.array(depth_frame.get_data()))
+                color_temp = np.asarray(color_frame.get_data())
+                color_image = o3d.geometry.Image(color_temp)
+
+                rgbd_image = o3d.geometry.RGBDImage.create_from_color_and_depth(
+                    color_image,
+                    depth_image,
+                    depth_scale=1.0 / depth_scale,
+                    depth_trunc=clipping_distance_in_meters,
+                    convert_rgb_to_intensity=False)
+                temp = o3d.geometry.PointCloud.create_from_rgbd_image(
+                    rgbd_image, intrinsic)
+                temp.transform(flip_transform)
+                self._pcd.points = temp.points
+                self._pcd.colors = temp.colors
+
+                if frame_count == 0:
+                    vis.add_geometry(self._pcd)
+                vis.update_geometry(self._pcd)
+                vis.poll_events()
+                vis.update_renderer()
+
+                process_time = datetime.now() - dt0
+                print("FPS: " + str(1 / process_time.total_seconds()))
+                frame_count += 1
+
+                if self._return_cmd:
+                    break
+
+        finally:
+            # stop streaming
+            self.close()
+            vis.destroy_window()

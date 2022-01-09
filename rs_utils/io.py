@@ -22,6 +22,9 @@ def get_options():
         '--bag_path', dest='bag_path', type=str,
         help='set path to bag file')
     parser.add_argument(
+        '--pcd_path', dest='pcd_path', type=str,
+        help='set path to pcd file')
+    parser.add_argument(
         '--indir', dest='indir', type=str,
         help='set path to input directory')
     parser.add_argument(
