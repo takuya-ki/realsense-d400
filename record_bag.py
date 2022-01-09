@@ -2,12 +2,12 @@
 # -*- coding: utf-8 -*-
 import os
 
-import rs_utils.io as ioutil
-import rs_utils.realsense as rsutil
+from rs_utils.io import get_options
+from rs_utils.realsense import RealSenseD435
 
 
 if __name__ == '__main__':
-    args = ioutil.get_options()
+    args = get_options()
     save_type = args.save_type
     custom_rs_options = args.is_rsopt
     rec_time = args.record_time
@@ -18,7 +18,7 @@ if __name__ == '__main__':
         os.path.dirname(__file__),
         args.cfg_path)
 
-    rs_d435 = rsutil.RealSenseD435(
+    rs_d435 = RealSenseD435(
         save_type,
         cfg_path,
         custom_rs_options)

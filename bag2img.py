@@ -2,12 +2,12 @@
 # -*- coding: utf-8 -*-
 import os
 
-import rs_utils.io as ioutil
-import rs_utils.realsense as rsutil
+from rs_utils.io import get_options, get_file_paths
+from rs_utils.realsense import RealSenseD435
 
 
 if __name__ == '__main__':
-    args = ioutil.get_options()
+    args = get_options()
     save_type = args.save_type
 
     bags_path = args.indir
@@ -29,10 +29,10 @@ if __name__ == '__main__':
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
 
-    bag_paths, bag_names = ioutil.get_file_paths(bags_dir, 'bag')
+    bag_paths, bag_names = get_file_paths(bags_dir, 'bag')
     for (bag_path, bag_name) in zip(bag_paths, bag_names):
         save_img_path_noext = os.path.join(save_dir, bag_name)
-        rs_d435 = rsutil.RealSenseD435(
+        rs_d435 = RealSenseD435(
             save_type=save_type,
             rs_cfg_path=cfg_path,
             in_bag_path=bag_path)
