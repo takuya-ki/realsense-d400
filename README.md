@@ -12,7 +12,7 @@ RealSense D400 series utilities
 
 ## Installation
 
-	$ git clone https://github.com/takuya-ki/realsense-d400.git
+	$ git clone https://github.com/takuya-ki/realsense-d400.git; cd realsense-d400
 	$ python setup.py install
 
 ## Usage
