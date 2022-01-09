@@ -26,8 +26,7 @@ if __name__ == '__main__':
     save_dir = os.path.join(
         os.path.dirname(__file__),
         save_path)
-    if not os.path.exists(save_dir):
-        os.makedirs(save_dir)
+    os.makedirs(save_dir, exists_ok=True)
 
     bag_paths, bag_names = get_file_paths(bags_dir, 'bag')
     for (bag_path, bag_name) in zip(bag_paths, bag_names):
