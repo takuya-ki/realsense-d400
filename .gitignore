@@ -7,3 +7,5 @@ build
 
 /data/*
 !/data/cfg
+
+*.bag

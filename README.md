@@ -31,8 +31,8 @@ RealSense D400 series utilities
     $ python bag2mp4.py --save_type [save_type] --indir [path_to_bags_dir] --outdir [path_to_mp4s_dir] --cfg_path [path_to_cfg_file]
     $ python bag2mp4.py --save_type RGBD --is_rsopt --indir data/bag/record --outdir data/video/record --cfg_path data/cfg/rsd435.pkl
 
-    $ python capture_pcd.py --save_type RGBD --is_rsopt --pcd_path [path_to_pcd_file] --cfg_path [path_to_cfg_file]
-    $ python capture_pcd.py --save_type RGBD --is_rsopt --pcd_path data/pcd/test.pcd --cfg_path data/cfg/rsd435.pkl
+    $ python capture_pcd.py --is_rsopt --pcd_path [path_to_pcd_file] --cfg_path [path_to_cfg_file]
+    $ python capture_pcd.py --is_rsopt --pcd_path data/pcd/test.pcd --cfg_path data/cfg/rsd435.pkl
 
 ##### change camera configurations
 

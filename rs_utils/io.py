@@ -3,6 +3,7 @@
 import os
 import glob
 import argparse
+import os.path as osp
 
 
 def get_options():
@@ -46,9 +47,9 @@ def get_options():
 
 
 def get_file_paths(file_dir, file_ext, is_show=False):
-    path = os.path.join(file_dir, '*.'+file_ext)
+    path = osp.join(file_dir, '*.'+file_ext)
     file_paths = glob.glob(path)
-    file_names = [os.path.splitext(os.path.basename(r))[0] for r in file_paths]
+    file_names = [osp.splitext(osp.basename(r))[0] for r in file_paths]
     if is_show:
         print(file_names)
         print(file_paths)

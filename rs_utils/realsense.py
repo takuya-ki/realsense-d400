@@ -8,7 +8,6 @@ import numpy as np
 import open3d as o3d
 from enum import IntEnum
 import pyrealsense2 as rs
-from datetime import datetime
 
 
 class Preset(IntEnum):
@@ -133,28 +132,57 @@ class RealSenseD435(object):
         try:
             # capture the image not including an object
             self.start_saving_bag(out_bag_path)
+            # align depth image with color image
+            if self._align_frames:
+                align_to = rs.stream.color
+                align = rs.align(align_to)
+
             start = time.time()
             try:
                 while True:
                     if isShow:
                         # waiting for a frame (Color & Depth)
-                        frames = self._pipeline.wait_for_frames()
+                        try:
+                            frames = self._pipeline.wait_for_frames(5000)
+                            if self._align_frames:
+                                frames = align.process(frames)
+                        except RuntimeError:
+                            break
                         color_frame = frames.get_color_frame()
-                        depth_frame = frames.get_depth_frame()
-                        if not depth_frame or not color_frame:
-                            continue
-                        color_image = np.asanyarray(color_frame.get_data())
-                        depth_color_frame = \
-                            rs.colorizer().colorize(depth_frame)
-                        depth_color_image = \
-                            np.asanyarray(depth_color_frame.get_data())
-                        images = np.hstack((color_image, depth_color_image))
-                        dst_images = self.scale_to_width(images, 1200)
 
+                        if self._save_type in ['D', 'RGBD', 'RGBDIR']:
+                            depth_frame = frames.get_depth_frame()
+                        if self._save_type in ['IR', 'RGBDIR']:
+                            infrared_frame = frames.get_infrared_frame()
+
+                        if not color_frame:
+                            continue
+                        if (self._save_type in ['D', 'RGBD', 'RGBDIR']) and \
+                        not depth_frame:
+                            continue
+                        if (self._save_type in ['IR', 'RGBDIR']) and \
+                        not infrared_frame:
+                            continue
+                        images = np.asanyarray(color_frame.get_data())
+                        if self._save_type in ['D', 'RGBD', 'RGBDIR']:
+                            depth_color_frame = rs.colorizer().colorize(depth_frame)
+                            depth_color_image = np.asanyarray(
+                                depth_color_frame.get_data())
+                            images = np.hstack((images, depth_color_image))
+                        if self._save_type in ['IR', 'RGBDIR']:
+                            infrared_image = np.asanyarray(
+                                infrared_frame.get_data())
+                            infrared_3c_image = cv2.cvtColor(
+                                infrared_image, cv2.COLOR_GRAY2BGR)
+                            images = np.hstack((images, infrared_3c_image))
+
+                        # displaying
+                        dst_images = self.scale_to_width(images, 800)
                         cv2.namedWindow('RealSense', cv2.WINDOW_AUTOSIZE)
-                        cv2.moveWindow('RealSense', 50, 100)
+                        cv2.moveWindow('RealSense', 100, 200)
                         cv2.imshow('RealSense', dst_images)
-                        cv2.waitKey(1)
+                        if cv2.waitKey(1) & 0xff == 27:
+                            break
                     # save for sec
                     elapsed_time = time.time() - start
                     if elapsed_time > rec_time:
@@ -458,9 +486,9 @@ class RealSenseD435(object):
         flip_transform = [[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]]
         # streaming loop
         frame_count = 0
+        start = time.time()
         try:
             while True:
-                dt0 = datetime.now()
                 try:
                     frames = self._pipeline.wait_for_frames(5000)
                     frames = align.process(frames)
@@ -500,8 +528,8 @@ class RealSenseD435(object):
                 vis.poll_events()
                 vis.update_renderer()
 
-                process_time = datetime.now() - dt0
-                print("FPS: " + str(1 / process_time.total_seconds()))
+                elapsed_time = time.time() - start
+                print("FPS: " + str(1.0 / elapsed_time))
                 frame_count += 1
 
                 if self._return_cmd:

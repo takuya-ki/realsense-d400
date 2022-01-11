@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import os
 import open3d as o3d
+import os.path as osp
 
 from rs_utils.io import get_options
 from rs_utils.realsense import RealSenseD435
@@ -15,17 +16,13 @@ def rotate_view(vis):
 
 if __name__ == '__main__':
     args = get_options()
-    save_type = args.save_type
+
     custom_rs_options = args.is_rsopt
-    save_pcd_path = os.path.join(
-        os.path.dirname(__file__),
-        args.pcd_path)
-    cfg_path = os.path.join(
-        os.path.dirname(__file__),
-        args.cfg_path)
+    save_pcd_path = osp.join(osp.dirname(__file__), args.pcd_path)
+    cfg_path = osp.join(osp.dirname(__file__), args.cfg_path)
 
     rs_d435 = RealSenseD435(
-        save_type,
+        'RGBD',
         cfg_path,
         custom_rs_options)
     rs_d435.capture_pcd(save_pcd_path)
