@@ -118,92 +118,14 @@ class RealSenseD435(object):
         cv2.destroyAllWindows()
         print("finish pipeline for realsense")
 
-    def start_saving_bag(self, out_bag_path):
-        # set the file name recorded
-        self._realsense.enable_record_to_file(out_bag_path)
-        # start streaming
-        self._pipeline.start(self._realsense)
-        # set fixed sensor parameters
-        self._setting_sensor_params()
-        time.sleep(1)
-        print("start pipeline for realsense...")
-
-    def record_bag(self, out_bag_path, rec_time, isShow=False):
-        try:
-            # capture the image not including an object
-            self.start_saving_bag(out_bag_path)
-            # align depth image with color image
-            if self._align_frames:
-                align_to = rs.stream.color
-                align = rs.align(align_to)
-
-            start = time.time()
-            try:
-                while True:
-                    if isShow:
-                        # waiting for a frame (Color & Depth)
-                        try:
-                            frames = self._pipeline.wait_for_frames(5000)
-                            if self._align_frames:
-                                frames = align.process(frames)
-                        except RuntimeError:
-                            break
-                        color_frame = frames.get_color_frame()
-
-                        if self._save_type in ['D', 'RGBD', 'RGBDIR']:
-                            depth_frame = frames.get_depth_frame()
-                        if self._save_type in ['IR', 'RGBDIR']:
-                            infrared_frame = frames.get_infrared_frame()
-
-                        if not color_frame:
-                            continue
-                        if (self._save_type in ['D', 'RGBD', 'RGBDIR']) and \
-                        not depth_frame:
-                            continue
-                        if (self._save_type in ['IR', 'RGBDIR']) and \
-                        not infrared_frame:
-                            continue
-                        images = np.asanyarray(color_frame.get_data())
-                        if self._save_type in ['D', 'RGBD', 'RGBDIR']:
-                            depth_color_frame = rs.colorizer().colorize(depth_frame)
-                            depth_color_image = np.asanyarray(
-                                depth_color_frame.get_data())
-                            images = np.hstack((images, depth_color_image))
-                        if self._save_type in ['IR', 'RGBDIR']:
-                            infrared_image = np.asanyarray(
-                                infrared_frame.get_data())
-                            infrared_3c_image = cv2.cvtColor(
-                                infrared_image, cv2.COLOR_GRAY2BGR)
-                            images = np.hstack((images, infrared_3c_image))
-
-                        # displaying
-                        dst_images = self.scale_to_width(images, 800)
-                        cv2.namedWindow('RealSense', cv2.WINDOW_AUTOSIZE)
-                        cv2.moveWindow('RealSense', 100, 200)
-                        cv2.imshow('RealSense', dst_images)
-                        if cv2.waitKey(1) & 0xff == 27:
-                            break
-                    # save for sec
-                    elapsed_time = time.time() - start
-                    if elapsed_time > rec_time:
-                        break
-            finally:
-                # stop streaming
-                self.close()
-        except KeyboardInterrupt:
-            return
-
-    def play_bag(self):
-        # start streaming
-        profile = self._pipeline.start(self._realsense)
-        playback = profile.get_device().as_playback()
-        playback.set_real_time(True)
-
+    def show_frames(self, end_time=None):
         # align depth image with color image
         if self._align_frames:
             align_to = rs.stream.color
             align = rs.align(align_to)
 
+        if end_time is not None:
+            start = time.time()
         try:
             while True:
                 # waiting for a frame (Color & Depth)
@@ -222,11 +144,11 @@ class RealSenseD435(object):
 
                 if not color_frame:
                     continue
-                if (self._save_type in ['D', 'RGBD', 'RGBDIR']) and \
-                   not depth_frame:
+                if (self._save_type in ['D', 'RGBD', 'RGBDIR']) \
+                   and not depth_frame:
                     continue
-                if (self._save_type in ['IR', 'RGBDIR']) and \
-                   not infrared_frame:
+                if (self._save_type in ['IR', 'RGBDIR']) \
+                   and not infrared_frame:
                     continue
                 images = np.asanyarray(color_frame.get_data())
                 if self._save_type in ['D', 'RGBD', 'RGBDIR']:
@@ -248,14 +170,41 @@ class RealSenseD435(object):
                 cv2.imshow('RealSense', dst_images)
                 if cv2.waitKey(1) & 0xff == 27:
                     break
-
+                if end_time is not None:
+                    # save for sec
+                    elapsed_time = time.time() - start
+                    if elapsed_time > end_time:
+                        break
         finally:
             # stop streaming
-            self._pipeline.stop()
-            cv2.destroyAllWindows()
+            self.close()
 
-    # mode = "one-scene" or "snapshot"
-    # fps = float value
+    def start_saving_bag(self, out_bag_path):
+        # set the file name recorded
+        self._realsense.enable_record_to_file(out_bag_path)
+        # start streaming
+        self._pipeline.start(self._realsense)
+        # set fixed sensor parameters
+        self._setting_sensor_params()
+        time.sleep(1)
+        print("start pipeline for realsense...")
+
+    def record_bag(self, out_bag_path, rec_time, isShow=False):
+        try:
+            # capture the image not including an object
+            self.start_saving_bag(out_bag_path)
+            if isShow:
+                self.show_frames(end_time=rec_time)
+        except KeyboardInterrupt:
+            return
+
+    def play_bag(self):
+        # start streaming
+        profile = self._pipeline.start(self._realsense)
+        playback = profile.get_device().as_playback()
+        playback.set_real_time(True)
+        self.show_frames()
+
     def bag2img(self,
                 save_img_path_noext,
                 mode="snapshot",
@@ -460,7 +409,7 @@ class RealSenseD435(object):
         # set fixed sensor parameters
         self._setting_sensor_params()
         time.sleep(1)
-        # getting the depth sensor's depth scale (see rs-align example for explanation)
+        # getting depth scale (see rs-align example for explanation)
         depth_scale = depth_sensor.get_depth_scale()
         # not display the background of objects more than
         # clipping_distance_in_meters meters away
@@ -474,16 +423,20 @@ class RealSenseD435(object):
         vis.create_window()
 
         self._pcdpath = pcdpath
+
         def save_pcd(_vis):
             o3d.io.write_point_cloud(self._pcdpath, self._pcd)
         vis.register_key_callback(ord("S"), save_pcd)
         self._return_cmd = False
+
         def return_with_q(_vis):
+            o3d.io.write_point_cloud(self._pcdpath, self._pcd)
             self._return_cmd = True
         vis.register_key_callback(ord("Q"), return_with_q)
 
         self._pcd = o3d.geometry.PointCloud()
-        flip_transform = [[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]]
+        flip_transform = [
+            [1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]]
         # streaming loop
         frame_count = 0
         start = time.time()
@@ -510,12 +463,13 @@ class RealSenseD435(object):
                 color_temp = np.asarray(color_frame.get_data())
                 color_image = o3d.geometry.Image(color_temp)
 
-                rgbd_image = o3d.geometry.RGBDImage.create_from_color_and_depth(
-                    color_image,
-                    depth_image,
-                    depth_scale=1.0 / depth_scale,
-                    depth_trunc=clipping_distance_in_meters,
-                    convert_rgb_to_intensity=False)
+                rgbd_image = \
+                    o3d.geometry.RGBDImage.create_from_color_and_depth(
+                        color_image,
+                        depth_image,
+                        depth_scale=1.0 / depth_scale,
+                        depth_trunc=clipping_distance_in_meters,
+                        convert_rgb_to_intensity=False)
                 temp = o3d.geometry.PointCloud.create_from_rgbd_image(
                     rgbd_image, intrinsic)
                 temp.transform(flip_transform)

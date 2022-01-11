@@ -9,3 +9,4 @@ build
 !/data/cfg
 
 *.bag
+*.pcd
