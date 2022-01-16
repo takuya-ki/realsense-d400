@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+
 import os
 import cv2
 import time
@@ -11,6 +11,7 @@ import pyrealsense2 as rs
 
 
 class Preset(IntEnum):
+    """Defines preset for setting realsense's resolution."""
     Custom = 0
     Default = 1
     Hand = 2
@@ -20,6 +21,7 @@ class Preset(IntEnum):
 
 
 class RealSenseD435(object):
+    """Class of realsense d435 handler."""
 
     def __init__(self,
                  save_type,
@@ -27,6 +29,7 @@ class RealSenseD435(object):
                  custom_rs_options=False,
                  in_bag_path=None,
                  align_frames=True):
+        """\Initializes the camera configuration and pipeline."""
 
         self._save_type = save_type
         self._custom_rs_options = custom_rs_options
@@ -39,6 +42,7 @@ class RealSenseD435(object):
         self._pipeline = rs.pipeline()
 
     def _rs_setup(self):
+        """Enables stream with the input specification."""
         if self._in_bag_path is not None:
             self._realsense.enable_device_from_file(
                 self._in_bag_path, repeat_playback=False)
@@ -66,6 +70,7 @@ class RealSenseD435(object):
                 self._rs_cfgs['FPS'])
 
     def _setting_sensor_params(self):
+        """Sets camera configuration options."""
         ctx = rs.context()
         device_list = ctx.query_devices()
         num_devices = device_list.size()
@@ -110,15 +115,18 @@ class RealSenseD435(object):
                 rs.option.enable_auto_white_balance, True)
 
     def scale_to_width(self, img, width):
+        """Resizes an OpenCV image with the specified image width."""
         scale = width / img.shape[1]
         return cv2.resize(img, dsize=None, fx=scale, fy=scale)
 
     def close(self):
+        """Closes the realsense stream and image windows."""
         self._pipeline.stop()
         cv2.destroyAllWindows()
         print("finish pipeline for realsense")
 
     def show_frames(self, end_time=None):
+        """Gets and shows frames obtained from the stream."""
         # align depth image with color image
         if self._align_frames:
             align_to = rs.stream.color
@@ -180,6 +188,7 @@ class RealSenseD435(object):
             self.close()
 
     def start_saving_bag(self, out_bag_path):
+        """Starts the pipeline to save a bag file."""
         # set the file name recorded
         self._realsense.enable_record_to_file(out_bag_path)
         # start streaming
@@ -190,6 +199,7 @@ class RealSenseD435(object):
         print("start pipeline for realsense...")
 
     def record_bag(self, out_bag_path, rec_time, isShow=False):
+        """Starts recording to save a bag file."""
         try:
             # capture the image not including an object
             self.start_saving_bag(out_bag_path)
@@ -199,6 +209,7 @@ class RealSenseD435(object):
             return
 
     def play_bag(self):
+        """Starts the pipeline."""
         # start streaming
         profile = self._pipeline.start(self._realsense)
         playback = profile.get_device().as_playback()
@@ -210,6 +221,8 @@ class RealSenseD435(object):
                 mode="snapshot",
                 fps=0.5,
                 is_show=False):
+        """Converts a bag file to images."""
+
         # start streaming
         profile = self._pipeline.start(self._realsense)
         playback = profile.get_device().as_playback()
@@ -305,6 +318,7 @@ class RealSenseD435(object):
             cv2.destroyAllWindows()
 
     def bag2mp4(self, save_video_path, is_show=False):
+        """Converts a bag file to a video file."""
         # setting of fourcc (for mp4)
         fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
 
@@ -395,12 +409,14 @@ class RealSenseD435(object):
             cv2.destroyAllWindows()
 
     def _get_intrinsic_matrix(self, frame):
+        """Gets camera intrinsic parameters from the stream."""
         intr = frame.profile.as_video_stream_profile().intrinsics
         out = o3d.camera.PinholeCameraIntrinsic(
             640, 480, intr.fx, intr.fy, intr.ppx, intr.ppy)
         return out
 
     def capture_pcd(self, pcdpath):
+        """Capture point cloud from the stream."""
         # start streaming
         profile = self._pipeline.start(self._realsense)
         depth_sensor = profile.get_device().first_depth_sensor()

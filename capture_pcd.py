@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+
 import os
 import open3d as o3d
 import os.path as osp
@@ -9,6 +9,7 @@ from rs_utils.realsense import RealSenseD435
 
 
 def rotate_view(vis):
+    """Rotates the view used in Open3D."""
     ctr = vis.get_view_control()
     ctr.rotate(10.0, 0.0)
     return False

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+
 import os
 import glob
 import argparse
@@ -7,6 +7,7 @@ import os.path as osp
 
 
 def get_options():
+    """Returns user-specific options."""
     parser = argparse.ArgumentParser(
         description='Set options for all devices.')
     parser.add_argument(
@@ -47,6 +48,7 @@ def get_options():
 
 
 def get_file_paths(file_dir, file_ext, is_show=False):
+    """Get file names and paths."""
     path = osp.join(file_dir, '*.'+file_ext)
     file_paths = glob.glob(path)
     file_names = [osp.splitext(osp.basename(r))[0] for r in file_paths]
