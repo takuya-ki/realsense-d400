@@ -48,6 +48,10 @@ def get_options():
         '--img_ext', dest='imgext',
         type=str, default='png', choices=['png', 'jpg', 'bmp', 'tif'],
         help='set save image extention for bag2img')
+    parser.add_argument(
+        '--video_ext', dest='videoext',
+        type=str, default='mp4', choices=['mp4', 'wmv', 'mov', 'avi'],
+        help='set save image extention for bag2video')
     return parser.parse_args()
 
 

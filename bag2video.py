@@ -21,10 +21,14 @@ if __name__ == '__main__':
     os.makedirs(save_dir, exist_ok=True)
 
     bag_paths, bag_names = get_file_paths(bags_dir, 'bag')
+    save_ext = args.videoext
     for (bag_path, bag_name) in zip(bag_paths, bag_names):
-        save_video_path = osp.join(save_dir, bag_name+'.mp4')
+        save_video_path = osp.join(save_dir, bag_name+'.'+save_ext)
         rs_d435 = RealSenseD435(
             save_type=save_type,
             rs_cfg_path=cfg_path,
             in_bag_path=bag_path)
-        rs_d435.bag2mp4(save_video_path, is_show=True)
+        rs_d435.bag2video(
+            save_video_path,
+            save_ext,
+            is_show=True)

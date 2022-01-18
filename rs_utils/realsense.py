@@ -336,13 +336,20 @@ class RealSenseD435(object):
             self._pipeline.stop()
             cv2.destroyAllWindows()
 
-    def bag2mp4(self,
+    def bag2video(self,
                 save_video_path,
+                save_ext='mp4',
                 is_show=False):
         """Converts a bag file to a video file."""
 
-        # setting of fourcc (for mp4)
-        fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
+        if save_ext=='mp4':
+            fourcc = cv2.VideoWriter_fourcc('M', 'P', '4', 'V')
+        elif save_ext=='wmv':
+            fourcc = cv2.VideoWriter_fourcc('w', 'm', 'v', '1')
+        elif save_ext=='mov':
+            fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
+        elif save_ext=='avi':
+            fourcc = cv2.VideoWriter_fourcc('M', 'J', 'P', 'G')
 
         # specification of the video (file name, fourcc, FPS, size)
         if self._save_type in ['RGB', 'D', 'IR']:
