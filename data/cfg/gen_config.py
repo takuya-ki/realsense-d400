@@ -5,7 +5,7 @@ import numpy as np
 import os.path as osp
 
 
-def save_rs_cfg_pickle_d435(
+def save_rsd435_cfg_pickle(
         pklname,
         fps,
         w,
@@ -19,7 +19,6 @@ def save_rs_cfg_pickle_d435(
         sat,
         sharp,
         white,
-        auto_exp,
         auto_exp_prior,
         backlight_comp,
         enable_auto_exp,
@@ -54,12 +53,12 @@ def save_rs_cfg_pickle_d435(
 
 
 if __name__ == '__main__':
-    save_rs_cfg_pickle_d435(
+    save_rsd435_cfg_pickle(
         pklname="rsd435.pkl",
         fps=30,
         w=1280,
         h=720,
-        exp=200.0,  # setting large value (e.g. 5000), FPS goes down than it
+        exp=1000.0,  # setting large value (e.g. 5000), FPS goes down than it
         gain=0.0,
         bright=0.0,
         contrast=50.0,
@@ -67,7 +66,7 @@ if __name__ == '__main__':
         hue=0.0,
         sat=50.0,
         sharp=50.0,
-        white=4500.0,
+        white=4600.0,
         auto_exp_prior=False,
         backlight_comp=False,
         enable_auto_exp=False,
