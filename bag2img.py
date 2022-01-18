@@ -29,6 +29,7 @@ if __name__ == '__main__':
             in_bag_path=bag_path)
         rs_d435.bag2img(
             save_img_path_noext,
+            args.imgext,
             mode=args.save_mode,
             fps=args.save_fps,
             is_show=False)

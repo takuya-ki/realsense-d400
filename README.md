@@ -28,7 +28,7 @@ RealSense D400 series utilities
 
 ##### Converting bag files to images
     $ python bag2img.py --save_type [save_type] --indir [path_to_bags_dir] --outdir [path_to_imgs_dir] --cfg_path [path_to_cfg_file] --save_mode [save_mode] (--save_fps [float less than 1.0])
-    $ python bag2img.py --save_type RGBD --is_rsopt --indir data/bag/record --outdir data/img/record --cfg_path data/cfg/rsd435.pkl --save_mode one-scene
+    $ python bag2img.py --save_type RGBD --is_rsopt --indir data/bag/record --outdir data/img/record --cfg_path data/cfg/rsd435.pkl --save_mode one-scene --img_ext png
 
 ##### Converting bag files to videos
     $ python bag2mp4.py --save_type [save_type] --indir [path_to_bags_dir] --outdir [path_to_mp4s_dir] --cfg_path [path_to_cfg_file]

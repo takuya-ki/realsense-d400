@@ -236,6 +236,7 @@ class RealSenseD435(object):
 
     def bag2img(self,
                 save_img_path_noext,
+                save_ext='png',
                 mode="snapshot",
                 fps=0.5,
                 is_show=False):
@@ -301,7 +302,7 @@ class RealSenseD435(object):
                     cv2.waitKey(0)
 
                 # saving
-                save_img_path = save_img_path_noext+'_'+str(cnt)+'.png'
+                save_img_path = save_img_path_noext+'_'+str(cnt)+'.'+save_ext
                 if self._save_type == 'D':
                     if depth_color_image is None:
                         continue
@@ -335,8 +336,11 @@ class RealSenseD435(object):
             self._pipeline.stop()
             cv2.destroyAllWindows()
 
-    def bag2mp4(self, save_video_path, is_show=False):
+    def bag2mp4(self,
+                save_video_path,
+                is_show=False):
         """Converts a bag file to a video file."""
+
         # setting of fourcc (for mp4)
         fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
 

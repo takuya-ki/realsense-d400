@@ -44,6 +44,10 @@ def get_options():
         '--save_fps', dest='save_fps',
         type=float, default=1.0,
         help='set save fps for bag2img')
+    parser.add_argument(
+        '--img_ext', dest='imgext',
+        type=str, default='png', choices=['png', 'jpg', 'bmp', 'tif'],
+        help='set save image extention for bag2img')
     return parser.parse_args()
 
 
