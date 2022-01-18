@@ -29,7 +29,7 @@ class RealSenseD435(object):
                  custom_rs_options=False,
                  in_bag_path=None,
                  align_frames=True):
-        """\Initializes the camera configuration and pipeline."""
+        """Initializes the camera configuration and pipeline."""
 
         self._save_type = save_type
         self._custom_rs_options = custom_rs_options
@@ -87,32 +87,50 @@ class RealSenseD435(object):
 
         if self._custom_rs_options:
             sensor_color.set_option(
-                rs.option.enable_auto_exposure, False)
+                rs.option.exposure,
+                self._rs_cfgs['EXPOSURE'])
             sensor_color.set_option(
-                rs.option.enable_auto_white_balance, False)
+                rs.option.gain,
+                self._rs_cfgs['GAIN'])
             sensor_color.set_option(
-                rs.option.exposure, self._rs_cfgs['EXPOSURE'])
+                rs.option.brightness,
+                self._rs_cfgs['BRIGHTNESS'])
             sensor_color.set_option(
-                rs.option.gain, self._rs_cfgs['GAIN'])
+                rs.option.contrast,
+                self._rs_cfgs['CONTRAST'])
             sensor_color.set_option(
-                rs.option.brightness, self._rs_cfgs['BRIGHTNESS'])
+                rs.option.gamma,
+                self._rs_cfgs['GAMMA'])
             sensor_color.set_option(
-                rs.option.contrast, self._rs_cfgs['CONTRAST'])
+                rs.option.hue,
+                self._rs_cfgs['HUE'])
             sensor_color.set_option(
-                rs.option.gamma, self._rs_cfgs['GAMMA'])
+                rs.option.saturation,
+                self._rs_cfgs['SATURATION'])
             sensor_color.set_option(
-                rs.option.hue, self._rs_cfgs['HUE'])
+                rs.option.sharpness,
+                self._rs_cfgs['SHARPNESS'])
             sensor_color.set_option(
-                rs.option.saturation, self._rs_cfgs['SATURATION'])
+                rs.option.white_balance,
+                self._rs_cfgs['WHITE_BALANCE'])
             sensor_color.set_option(
-                rs.option.sharpness, self._rs_cfgs['SHARPNESS'])
+                rs.option.auto_exposure_priority,
+                self._rs_cfgs['AUTO_EXP_PRIOR'])
             sensor_color.set_option(
-                rs.option.white_balance, self._rs_cfgs['WHITE_BALANCE'])
-        else:
+                rs.option.backlight_compensation,
+                self._rs_cfgs['BACKLIGHT_COMP'])
             sensor_color.set_option(
-                rs.option.enable_auto_exposure, True)
+                rs.option.enable_auto_exposure,
+                self._rs_cfgs['ENABLE_AUTO_EXP'])
             sensor_color.set_option(
-                rs.option.enable_auto_white_balance, True)
+                rs.option.enable_auto_white_balance,
+                self._rs_cfgs['ENABLE_AUTO_WHITE'])
+            sensor_color.set_option(
+                rs.option.global_time_enabled,
+                self._rs_cfgs['GLOBAL_TIME_ENABLED'])
+            sensor_color.set_option(
+                rs.option.power_line_frequency,
+                self._rs_cfgs['POWER_LINE_FREQ'])
 
     def scale_to_width(self, img, width):
         """Resizes an OpenCV image with the specified image width."""
