@@ -251,10 +251,10 @@ class RealSenseD435(object):
             # stop streaming
             self.close()
 
-    def start_saving_bag(self, out_bag_path, tid):
+    def start_saving_bag(self, out_bag_paths, tid):
         """Starts the pipeline to save a bag file."""
         # set the file name recorded
-        self._realsenses[tid].enable_record_to_file(out_bag_path)
+        self._realsenses[tid].enable_record_to_file(out_bag_paths[tid])
         # start streaming
         self._pipelines[tid].start(self._realsenses[tid])
         # set fixed sensor parameters
@@ -262,12 +262,12 @@ class RealSenseD435(object):
         time.sleep(1)
         print("start pipeline for realsense...")
 
-    def record_bag(self, out_bag_path, rec_time, isShow=False):
+    def record_bag(self, out_bag_paths, rec_time, isShow=False):
         """Starts recording to save a bag file."""
         try:
             # capture the image not including an object
             for i in range(self._num_camera):
-                self.start_saving_bag(out_bag_path, i)
+                self.start_saving_bag(out_bag_paths[i], i)
             if isShow:
                 self.show_frames(end_time=rec_time)
         except KeyboardInterrupt:
@@ -492,17 +492,19 @@ class RealSenseD435(object):
             intr.fx, intr.fy, intr.ppx, intr.ppy)
         return out
 
-    def capture_pcd(self, pcdpath):
+    def capture_pcd(self, pcdpaths):
         """Captures point cloud created from RGBD frames."""
 
-        self._pcdpath = pcdpath
+        self._pcdpaths = pcdpaths
         self._return_cmd = False
         def save_pcd(_vis):
             """Saves point cloud data."""
-            o3d.io.write_point_cloud(self._pcdpath, self._pcd)
+            for pcdpath, pcd in zip(self._pcdpaths, self._pcds):
+                o3d.io.write_point_cloud(pcdpath, pcd)
         def return_with_q(_vis):
             """Finishes capturing."""
-            o3d.io.write_point_cloud(self._pcdpath, self._pcd)
+            for pcdpath, pcd in zip(self._pcdpaths, self._pcds):
+                o3d.io.write_point_cloud(pcdpath, pcd)
             self._return_cmd = True
         flip_transform = [
             [1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]]
@@ -535,10 +537,10 @@ class RealSenseD435(object):
             vises[i].register_key_callback(ord("S"), save_pcd)
             vises[i].register_key_callback(ord("Q"), return_with_q)
 
-        self._pcd = [o3d.geometry.PointCloud()
+        self._pcds = [o3d.geometry.PointCloud()
                      for _ in range(self._num_camera)]
         # streaming loop
-        geometry_added = False
+        geometry_addeds = [False for _ in range(self._num_camera)]
         start = time.time()
         try:
             while True:
@@ -575,17 +577,16 @@ class RealSenseD435(object):
                     temp = o3d.geometry.PointCloud.create_from_rgbd_image(
                         rgbd_image, intrinsic)
                     temp.transform(flip_transform)
-                    self._pcd.points = temp.points
-                    self._pcd.colors = temp.colors
-
-                    if not geometry_added:
-                        vises[i].add_geometry(self._pcd)
-                        geometry_added = True
-                    vises[i].update_geometry(self._pcd)
+                    self._pcds[i].points = temp.points
+                    self._pcds[i].colors = temp.colors
+                    if not geometry_addeds[i]:
+                        vises[i].add_geometry(self._pcds[i])
+                        geometry_addeds[i] = True
+                    vises[i].update_geometry(self._pcds[i])
                     vises[i].poll_events()
                     vises[i].update_renderer()
 
-                    cv2.imshow('bgr', color_temp)
+                    cv2.imshow('bgr: '+str(i), color_temp)
                     cv2.waitKey(1)
                 elapsed_time = time.time() - start
                 print("FPS: " + str(1.0 / elapsed_time))

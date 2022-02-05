@@ -19,7 +19,11 @@ if __name__ == '__main__':
     args = get_options()
 
     custom_rs_options = args.is_rsopt
-    save_pcd_path = osp.join(osp.dirname(__file__), args.pcd_path)
+    save_pcd_paths = [
+        osp.join(osp.dirname(__file__),
+                 osp.splitext(args.pcd_path)[0] +
+                 '_' + str(i) + '.pcd')
+        for i in range(args.num_camera)]
     cfg_path = osp.join(osp.dirname(__file__), args.cfg_path)
     os.makedirs(os.path.dirname(args.pcd_path), exist_ok=True)
 
@@ -27,11 +31,13 @@ if __name__ == '__main__':
         'RGBD',
         cfg_path,
         custom_rs_options,
-        device_sn=args.device_sn)
-    rs_d435.capture_pcd(save_pcd_path)
-    print("saved "+save_pcd_path)
+        device_sn=args.device_sn,
+        num_camera=args.num_camera)
+    rs_d435.capture_pcd(save_pcd_paths)
 
-    # visualize saved pcd file
-    pcd = o3d.io.read_point_cloud(save_pcd_path)
-    o3d.visualization.draw_geometries_with_animation_callback(
-        [pcd], rotate_view)
+    for i, savepcdpath in enumerate(save_pcd_paths):
+        print("displaying " + savepcdpath)
+        # visualize saved pcd file
+        pcd = o3d.io.read_point_cloud(save_pcd_paths[i])
+        o3d.visualization.draw_geometries_with_animation_callback(
+            [pcd], rotate_view)
