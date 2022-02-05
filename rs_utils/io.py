@@ -54,6 +54,9 @@ def get_options():
     parser.add_argument(
         '--device_sn', dest='device_sn',
         type=str, help='set device serial number to open')
+    parser.add_argument(
+        '--num_camera', dest='num_camera', type=int, default=1,
+        help='how many cameras do you use?')
     return parser.parse_args()
 
 

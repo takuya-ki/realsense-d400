@@ -2,6 +2,13 @@
 
 RealSense D400 series utilities
 
+## Features
+- Records bags with a camera or multiple cameras.
+- Plays a bag recorded with this library
+- Converts bag files to image files
+- Converts bag files to video files
+- Captures point cloud created from recorded RGBD frames
+
 ## Requirements
 
 - Python 3.8.10
@@ -37,6 +44,10 @@ RealSense D400 series utilities
 ##### Capturing point clouds
     $ python capture_pcd.py --is_rsopt --pcd_path [path_to_pcd_file] --cfg_path [path_to_cfg_file]
     $ python capture_pcd.py --is_rsopt --pcd_path data/pcd/record/record.pcd --cfg_path data/cfg/auto.pkl
+
+##### Recording bags with multiple cameras
+    $ python record_bag.py --save_type [save_type] --is_rsopt --rectime 10 --bag_path [path_to_bag_file] --cfg_path [path_to_cfg_file] --num_camera 2
+    $ python record_bag.py --save_type RGBD --is_rsopt --rectime 5 --bag_path data/bag/record/record.bag --cfg_path data/cfg/auto.pkl --num_camera 2
 
 ##### change camera configurations
 

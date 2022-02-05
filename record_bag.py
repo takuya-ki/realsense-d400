@@ -21,6 +21,7 @@ if __name__ == '__main__':
         save_type,
         cfg_path,
         custom_rs_options,
-        device_sn=args.device_sn)
+        device_sn=args.device_sn,
+        num_camera=args.num_camera)
     rs_d435.record_bag(save_bag_path, rec_time, isShow=True)
     print("saved "+save_bag_path)
