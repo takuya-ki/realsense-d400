@@ -7,7 +7,6 @@ import numpy as np
 import open3d as o3d
 from enum import IntEnum
 import pyrealsense2 as rs
-from zmq import device
 
 
 class Preset(IntEnum):
@@ -78,7 +77,7 @@ class RealSenseD435(object):
                 else:
                     for i in range(num_devices):
                         print("input %3d: open %s %s"
-                            % (i, devnames[i], devsns[i]))
+                              % (i, devnames[i], devsns[i]))
                     print("input number of target device >> ", end="")
                     num = int(input())
                     target_id = num
@@ -562,7 +561,7 @@ class RealSenseD435(object):
                 self._pcd.points = temp.points
                 self._pcd.colors = temp.colors
 
-                if geometry_added == False:
+                if not geometry_added:
                     vis.add_geometry(self._pcd)
                     geometry_added = True
                 vis.update_geometry(self._pcd)
@@ -570,10 +569,7 @@ class RealSenseD435(object):
                 vis.update_renderer()
 
                 cv2.imshow('bgr', color_temp)
-                key = cv2.waitKey(1)
-                if key == ord('q'):
-                    break
-
+                cv2.waitKey(1)
                 elapsed_time = time.time() - start
                 print("FPS: " + str(1.0 / elapsed_time))
 
