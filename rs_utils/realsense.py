@@ -217,14 +217,15 @@ class RealSenseD435(object):
                     if not color_frame:
                         continue
                     if (self._save_type in ['D', 'RGBD', 'RGBDIR']) \
-                    and not depth_frame:
+                       and not depth_frame:
                         continue
                     if (self._save_type in ['IR', 'RGBDIR']) \
-                    and not infrared_frame:
+                       and not infrared_frame:
                         continue
                     images = np.asanyarray(color_frame.get_data())
                     if self._save_type in ['D', 'RGBD', 'RGBDIR']:
-                        depth_color_frame = rs.colorizer().colorize(depth_frame)
+                        depth_color_frame = rs.colorizer().colorize(
+                            depth_frame)
                         depth_color_image = np.asanyarray(
                             depth_color_frame.get_data())
                         images = np.hstack((images, depth_color_image))
@@ -504,15 +505,18 @@ class RealSenseD435(object):
 
         self._pcdpaths = pcdpaths
         self._return_cmd = False
+
         def save_pcd(_vis):
             """Saves point cloud data."""
             for pcdpath, pcd in zip(self._pcdpaths, self._pcds):
                 o3d.io.write_point_cloud(pcdpath, pcd)
+
         def return_with_q(_vis):
             """Finishes capturing."""
             for pcdpath, pcd in zip(self._pcdpaths, self._pcds):
                 o3d.io.write_point_cloud(pcdpath, pcd)
             self._return_cmd = True
+
         flip_transform = [
             [1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]]
         # Create an align object
@@ -538,14 +542,15 @@ class RealSenseD435(object):
             # not display the background of objects more than
             # clipping_distance_in_meters meters away
             clipping_distance_in_meters = 5  # meter
-            clipping_distances.append(clipping_distance_in_meters / depth_scales[-1])
+            clipping_distances.append(
+                clipping_distance_in_meters / depth_scales[-1])
 
             vises[i].create_window()
             vises[i].register_key_callback(ord("S"), save_pcd)
             vises[i].register_key_callback(ord("Q"), return_with_q)
 
         self._pcds = [o3d.geometry.PointCloud()
-                     for _ in range(self._num_camera)]
+                      for _ in range(self._num_camera)]
         # streaming loop
         geometry_addeds = [False for _ in range(self._num_camera)]
         start = time.time()
