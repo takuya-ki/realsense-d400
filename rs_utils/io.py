@@ -33,7 +33,7 @@ def get_options():
         help='set path to output directory')
     parser.add_argument(
         '--cfg_path', dest='cfg_path',
-        type=str, default='data/cfg/rsd435.pkl',
+        type=str, default='data/cfg/auto.pkl',
         help='set path to realsense config file')
     parser.add_argument(
         '--save_mode', dest='save_mode',
