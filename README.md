@@ -4,12 +4,12 @@ RealSense D400 series utilities
 
 ## Requirements
 
-- Python 3.7.3
-  - numpy 1.21.5
-  - open3d 0.9.0.0
-  - pickle-mixin 1.0.2
-  - opencv-python 4.5.1.48
-  - pyrealsense2 2.34.0.1470
+- Python 3.8.10
+  - numpy >= 1.22.2
+  - open3d >= 0.14.1
+  - pickle-mixin >= 1.0.2
+  - opencv-python >= 4.5.5.62
+  - pyrealsense2 >= 2.50.0.3812
 
 ## Installation
 
