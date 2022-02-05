@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import os
 import os.path as osp
 
 from rs_utils.io import get_options

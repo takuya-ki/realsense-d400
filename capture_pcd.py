@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import os
 import open3d as o3d
 import os.path as osp
 

@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import os
 import cv2
 import time
 import pickle
@@ -337,18 +336,18 @@ class RealSenseD435(object):
             cv2.destroyAllWindows()
 
     def bag2video(self,
-                save_video_path,
-                save_ext='mp4',
-                is_show=False):
+                  save_video_path,
+                  save_ext='mp4',
+                  is_show=False):
         """Converts a bag file to a video file."""
 
-        if save_ext=='mp4':
+        if save_ext == 'mp4':
             fourcc = cv2.VideoWriter_fourcc('M', 'P', '4', 'V')
-        elif save_ext=='wmv':
+        elif save_ext == 'wmv':
             fourcc = cv2.VideoWriter_fourcc('w', 'm', 'v', '1')
-        elif save_ext=='mov':
+        elif save_ext == 'mov':
             fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
-        elif save_ext=='avi':
+        elif save_ext == 'avi':
             fourcc = cv2.VideoWriter_fourcc('M', 'J', 'P', 'G')
 
         # specification of the video (file name, fourcc, FPS, size)
