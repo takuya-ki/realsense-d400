@@ -36,7 +36,7 @@ RealSense D400 series utilities
 
 ##### Capturing point clouds
     $ python capture_pcd.py --is_rsopt --pcd_path [path_to_pcd_file] --cfg_path [path_to_cfg_file]
-    $ python capture_pcd.py --is_rsopt --pcd_path data/pcd/test.pcd --cfg_path data/cfg/rsd435.pkl
+    $ python capture_pcd.py --is_rsopt --pcd_path data/pcd/test.pcd --cfg_path data/cfg/auto.pkl 
 
 ##### change camera configurations
 

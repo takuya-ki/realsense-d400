@@ -457,7 +457,7 @@ class RealSenseD435(object):
         depth_scale = depth_sensor.get_depth_scale()
         # not display the background of objects more than
         # clipping_distance_in_meters meters away
-        clipping_distance_in_meters = 3  # 3 meter
+        clipping_distance_in_meters = 5  # meter
         clipping_distance = clipping_distance_in_meters / depth_scale
         # Create an align object
         align_to = rs.stream.depth
@@ -482,7 +482,7 @@ class RealSenseD435(object):
         flip_transform = [
             [1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]]
         # streaming loop
-        frame_count = 0
+        geometry_added = False
         start = time.time()
         try:
             while True:
@@ -505,14 +505,15 @@ class RealSenseD435(object):
                 depth_image = o3d.geometry.Image(
                     np.array(depth_frame.get_data()))
                 color_temp = np.asarray(color_frame.get_data())
-                color_image = o3d.geometry.Image(color_temp)
+                color_image = o3d.geometry.Image(
+                    cv2.cvtColor(color_temp, cv2.COLOR_BGR2RGB))
 
                 rgbd_image = \
                     o3d.geometry.RGBDImage.create_from_color_and_depth(
                         color_image,
                         depth_image,
                         depth_scale=1.0 / depth_scale,
-                        depth_trunc=clipping_distance_in_meters,
+                        depth_trunc=clipping_distance,
                         convert_rgb_to_intensity=False)
                 temp = o3d.geometry.PointCloud.create_from_rgbd_image(
                     rgbd_image, intrinsic)
@@ -520,15 +521,20 @@ class RealSenseD435(object):
                 self._pcd.points = temp.points
                 self._pcd.colors = temp.colors
 
-                if frame_count == 0:
+                if geometry_added == False:
                     vis.add_geometry(self._pcd)
+                    geometry_added = True
                 vis.update_geometry(self._pcd)
                 vis.poll_events()
                 vis.update_renderer()
 
+                cv2.imshow('bgr', color_temp)
+                key = cv2.waitKey(1)
+                if key == ord('q'):
+                    break
+
                 elapsed_time = time.time() - start
                 print("FPS: " + str(1.0 / elapsed_time))
-                frame_count += 1
 
                 if self._return_cmd:
                     break

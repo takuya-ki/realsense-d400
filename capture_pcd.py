@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import os
 import open3d as o3d
 import os.path as osp
 
@@ -20,6 +21,7 @@ if __name__ == '__main__':
     custom_rs_options = args.is_rsopt
     save_pcd_path = osp.join(osp.dirname(__file__), args.pcd_path)
     cfg_path = osp.join(osp.dirname(__file__), args.cfg_path)
+    os.makedirs(os.path.dirname(args.pcd_path), exist_ok=True)
 
     rs_d435 = RealSenseD435(
         'RGBD',
