@@ -194,6 +194,7 @@ class RealSenseD435(object):
 
         if end_time is not None:
             start = time.time()
+        loop_break = False
         try:
             while True:
                 dst_image_list = []
@@ -204,6 +205,7 @@ class RealSenseD435(object):
                         if self._align_frames:
                             frames = align.process(frames)
                     except RuntimeError:
+                        loop_break = True
                         break
                     color_frame = frames.get_color_frame()
 
@@ -235,8 +237,13 @@ class RealSenseD435(object):
                     dst_image = self.scale_to_width(images, 800)
                     dst_image_list.append(dst_image)
 
+                if loop_break:
+                    break
                 # displaying
-                dst_images = np.hstack(dst_image_list)
+                if self._num_camera > 1:
+                    dst_images = np.hstack(dst_image_list)
+                else:
+                    dst_images = dst_image_list[0]
                 cv2.namedWindow('RealSense', cv2.WINDOW_AUTOSIZE)
                 cv2.moveWindow('RealSense', 100, 200)
                 cv2.imshow('RealSense', dst_images)
@@ -542,6 +549,7 @@ class RealSenseD435(object):
         # streaming loop
         geometry_addeds = [False for _ in range(self._num_camera)]
         start = time.time()
+        loop_break = False
         try:
             while True:
                 for i in range(self._num_camera):
@@ -549,6 +557,7 @@ class RealSenseD435(object):
                         frames = self._pipelines[i].wait_for_frames(5000)
                         frames = align.process(frames)
                     except RuntimeError:
+                        loop_break = True
                         break
 
                     # Get aligned frames
@@ -591,7 +600,7 @@ class RealSenseD435(object):
                 elapsed_time = time.time() - start
                 print("FPS: " + str(1.0 / elapsed_time))
 
-                if self._return_cmd:
+                if self._return_cmd or loop_break:
                     break
 
         finally:
