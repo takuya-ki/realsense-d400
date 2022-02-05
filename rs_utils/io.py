@@ -51,6 +51,9 @@ def get_options():
         '--video_ext', dest='videoext',
         type=str, default='mp4', choices=['mp4', 'wmv', 'mov', 'avi'],
         help='set save image extention for bag2video')
+    parser.add_argument(
+        '--device_sn', dest='device_sn',
+        type=str, help='set device serial number to open')
     return parser.parse_args()
 
 

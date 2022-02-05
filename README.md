@@ -24,7 +24,7 @@ RealSense D400 series utilities
 
 ##### Playing a recorded bag
     $ python play_bag.py --save_type [save_type] --is_rsopt --bag_path [path_to_bag_file] --cfg_path [path_to_cfg_file]
-    $ python play_bag.py --save_type RGBD --is_rsopt --bag_path data/bag/record.bag --cfg_path data/cfg/auto.pkl
+    $ python play_bag.py --save_type RGBD --is_rsopt --bag_path data/bag/record/record.bag --cfg_path data/cfg/auto.pkl
 
 ##### Converting bag files to images
     $ python bag2img.py --save_type [save_type] --indir [path_to_bags_dir] --outdir [path_to_imgs_dir] --cfg_path [path_to_cfg_file] --save_mode [save_mode] (--save_fps [float less than 1.0])
@@ -36,7 +36,7 @@ RealSense D400 series utilities
 
 ##### Capturing point clouds
     $ python capture_pcd.py --is_rsopt --pcd_path [path_to_pcd_file] --cfg_path [path_to_cfg_file]
-    $ python capture_pcd.py --is_rsopt --pcd_path data/pcd/test.pcd --cfg_path data/cfg/auto.pkl 
+    $ python capture_pcd.py --is_rsopt --pcd_path data/pcd/record/record.pcd --cfg_path data/cfg/auto.pkl
 
 ##### change camera configurations
 

@@ -7,6 +7,7 @@ import numpy as np
 import open3d as o3d
 from enum import IntEnum
 import pyrealsense2 as rs
+from zmq import device
 
 
 class Preset(IntEnum):
@@ -27,7 +28,8 @@ class RealSenseD435(object):
                  rs_cfg_path,
                  custom_rs_options=False,
                  in_bag_path=None,
-                 align_frames=True):
+                 align_frames=True,
+                 device_sn=None):
         """Initializes the camera configuration and pipeline."""
 
         self._save_type = save_type
@@ -36,15 +38,58 @@ class RealSenseD435(object):
             self._rs_cfgs = pickle.load(f)
         self._in_bag_path = in_bag_path
         self._align_frames = align_frames
-        self._realsense = rs.config()
-        self._rs_setup()
+        self._device_sn = device_sn
         self._pipeline = rs.pipeline()
+        self._realsense = rs.config()
+        self._device = None
+        self._rs_setup()
 
     def _rs_setup(self):
-        """Enables stream with the input specification."""
+        """Enables device and stream with the input specification."""
         if self._in_bag_path is not None:
             self._realsense.enable_device_from_file(
                 self._in_bag_path, repeat_playback=False)
+        else:
+            ctx = rs.context()
+            dev_list = ctx.query_devices()
+            num_devices = dev_list.size()
+            assert num_devices > 0
+
+            # select sensor devices used
+            devnames = []
+            devsns = []
+            for d in dev_list:
+                devnames.append(d.get_info(rs.camera_info.name))
+                devsns.append(d.get_info(rs.camera_info.serial_number))
+                print('found device: ', devnames[-1], ' ', devsns[-1])
+
+            target_id = None
+            if num_devices == 1:
+                print("only found %s" % dev_list[0])
+                target_id = 0
+            else:
+                if self._device_sn is not None:
+                    for i in range(num_devices):
+                        if devsns[i] == self._device_sn:
+                            target_id = i
+                    if target_id is None:
+                        print("error: seleceted device not found")
+                        return None
+                else:
+                    for i in range(num_devices):
+                        print("input %3d: open %s %s"
+                            % (i, devnames[i], devsns[i]))
+                    print("input number of target device >> ", end="")
+                    num = int(input())
+                    target_id = num
+
+            # enable target device
+            self._device = dev_list[target_id]
+            targetdev = devnames[target_id]
+            targetsn = devsns[target_id]
+            print(' -> open device: ', targetdev, ' ', targetsn)
+            self._realsense.enable_device(targetsn)
+
         if self._save_type in ['RGB', 'RGBD', 'RGBDIR']:
             self._realsense.enable_stream(
                 rs.stream.color,
@@ -70,12 +115,7 @@ class RealSenseD435(object):
 
     def _setting_sensor_params(self):
         """Sets camera configuration options."""
-        ctx = rs.context()
-        device_list = ctx.query_devices()
-        num_devices = device_list.size()
-        assert num_devices > 0
-        device = device_list[0]
-        sensors = device.query_sensors()
+        sensors = self._device.query_sensors()
         color_idx = -1
         for i in range(len(sensors)):
             if not sensors[i].is_depth_sensor():
@@ -440,7 +480,8 @@ class RealSenseD435(object):
         """Gets camera intrinsic parameters from the stream."""
         intr = frame.profile.as_video_stream_profile().intrinsics
         out = o3d.camera.PinholeCameraIntrinsic(
-            640, 480, intr.fx, intr.fy, intr.ppx, intr.ppy)
+            self._rs_cfgs['WIDTH'], self._rs_cfgs['HEIGHT'],
+            intr.fx, intr.fy, intr.ppx, intr.ppy)
         return out
 
     def capture_pcd(self, pcdpath):

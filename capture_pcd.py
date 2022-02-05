@@ -26,7 +26,8 @@ if __name__ == '__main__':
     rs_d435 = RealSenseD435(
         'RGBD',
         cfg_path,
-        custom_rs_options)
+        custom_rs_options,
+        device_sn=args.device_sn)
     rs_d435.capture_pcd(save_pcd_path)
     print("saved "+save_pcd_path)
 
